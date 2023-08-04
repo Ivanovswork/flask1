@@ -1,0 +1,63 @@
+name: Тест
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-20.04
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DEBUG: "0"
+      ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+      DB_ENGINE: ${{ secrets.DB_ENGINE }}
+      NAME: ${{ secrets.NAME }}
+      USER: ${{ secrets.USER }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+      PORT: ${{ secrets.PORT }}
+      HOST: ${{ secrets.HOST }}
+    services:
+      postgesql_main:
+        image: postgres:12
+        env:
+          POSTGRES_DB: ${{ env.NAME }}
+          POSTGRES_USER: ${{ env.USER }}
+          POSTGRES_PASSWORD: ${{ env.PASSWORD }}
+        ports:
+          - 5432:432
+        options:
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Проверка репозитория на изменение
+        uses: actions/checkout@v3
+
+      - name: Установка python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+
+      - name: Установка зависимостей
+        run: pip intsall -r requiremets.txt
+
+      - name: Линтинг
+        run: flake8 orm22/orm_migrations/school/ --exclude=orm22/orm_migrations/school/migrations/
+
+      - name: Тесты
+        run: python manage.py test
+        env:
+          SECRET_KEY: ${{ env.SECRET_KEY }}
+          DEBUG: "0"
+          ALLOWED_HOSTS: ${{ env.ALLOWED_HOSTS }}
+          ENGINE: ${{ env.DB_ENGINE }}
+          NAME: ${{ env.NAME }}
+          USER: ${{ env.USER }}
+          PASSWORD: ${{ env.PASSWORD }}
+          PORT: ${{ env.PORT }}
+          HOST: ${{ env.HOST }}
+
+
