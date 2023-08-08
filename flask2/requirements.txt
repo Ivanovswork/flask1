@@ -1,0 +1,4 @@
+sqlalchemy==1.4.48
+flask
+psycopg2-binary
+pydantic
