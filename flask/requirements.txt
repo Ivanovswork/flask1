@@ -1,4 +1,0 @@
-sqlalchemy
-flask
-psycopg2-binary
-pydantic
